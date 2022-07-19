@@ -5,12 +5,14 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
+
 
 public class MonoStu {
     public static void main(String[] args) {
         //init();
-        userZip();
+        //userMap();
+        //userZip();
+        userFlatmap();
     }
 
     /**
@@ -26,6 +28,20 @@ public class MonoStu {
 
         Flux.fromStream(list.stream()).subscribe(System.out::println);
 
+    }
+
+    public static void userMap(){
+        Mono.just(1).map(one->{
+            return String.valueOf(one+" map transfer");
+        }).subscribe(System.out::println);
+    }
+
+    public static void userFlatmap(){
+        Flux<Integer> flux1 = Flux.just(1,2);
+        Flux<Integer> flux2  = Flux.just(3,4);
+        Flux.zip(flux1, flux2).flatMap(one->{
+            return Mono.just(one.getT1()+one.getT2());
+        }).subscribe(System.out::println);
     }
     public static void userZip(){
         Flux<Integer> flux1 = Flux.just(1,2);
