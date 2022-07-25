@@ -2,17 +2,20 @@ package com.example.fluxboot.other;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.Arrays;
 import java.util.List;
 
 
 public class MonoStu {
+    public static String record = "";
     public static void main(String[] args) {
         //init();
         //userMap();
         //userZip();
-        userFlatmap();
+        //userFlatmap();
+        userHandle();
     }
 
     /**
@@ -55,5 +58,64 @@ public class MonoStu {
 
 
     }
+
+    /**
+     * 多个操作，指定操作完成，就返回，没有完成的操作就丢弃
+     */
+    public static void userHandle() {
+        Mono<String> mono5 = Mono.just("").map(s -> {
+            try {
+                Thread.sleep(2000);
+                record += "mono5/";
+                System.out.println("mono5 is over");
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "5";
+        }).subscribeOn(Schedulers.boundedElastic());
+
+        Mono<String> mono10 = Mono.just(10).map(s->{
+            try {
+                Thread.sleep(4000);
+                record+= "mono10";
+                System.out.println("mono10 is over");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "10";
+        }).subscribeOn(Schedulers.boundedElastic());
+
+        Mono<String> mono15 = Mono.just(15).map(s->{
+            try {
+                Thread.sleep(6000);
+                record += "mode15";
+                System.out.println("mono15 is over");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "15";
+        }).subscribeOn(Schedulers.boundedElastic());
+
+        Mono<Object> single = Flux.merge(mono5, mono10,mono15).handle(((s, synchronousSink) ->{
+            if("10".equals(s)){
+
+                synchronousSink.next( "zj 牛逼 ");
+                synchronousSink.complete();
+            }
+        })).defaultIfEmpty("null").single();
+        System.out.println("-----");
+        single.subscribe(System.out::println);
+        try {
+            Thread.sleep(7000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+
+
 }
 
